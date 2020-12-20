@@ -13,4 +13,6 @@ app.get('/', async (req, res) => {
     res.status(2000).json({ app: 'running' });
 });
 
+require('./app/controllers')(app);
+
 app.listen(process.env.PORT || 3004, () => console.log('🔥🔥 app running'));
