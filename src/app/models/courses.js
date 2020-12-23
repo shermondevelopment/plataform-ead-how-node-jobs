@@ -8,9 +8,9 @@ module.exports = (sequelize, DataTypes) => {
          * The `models/index` file will call this method automatically.
          */
         static associate(models) {
-            this.hasMany(models.areas, {
-                throught: 'areas',
-                as: 'areas',
+            this.hasMany(models.disciplines, {
+                throught: 'disciplines',
+                as: 'discipline',
                 foreignKey: 'id_course',
             });
         }
@@ -30,6 +30,7 @@ module.exports = (sequelize, DataTypes) => {
             },
             description: { type: DataTypes.STRING, allowNull: true },
             image: { type: DataTypes.STRING },
+            slug: { type: DataTypes.STRING, allowNull: false },
         },
         {
             sequelize,

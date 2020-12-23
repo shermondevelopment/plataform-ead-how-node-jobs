@@ -14,6 +14,7 @@ module.exports = {
             },
             description: { type: Sequelize.STRING, allowNull: true },
             image: { type: Sequelize.STRING },
+            slug: { type: Sequelize.STRING, allowNull: false },
             createdAt: {
                 allowNull: false,
                 type: Sequelize.DATE,

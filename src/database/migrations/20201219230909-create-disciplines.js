@@ -19,10 +19,10 @@ module.exports = {
                 allowNull: false,
                 defaultValue: 0,
             },
-            id_areas: {
+            id_course: {
                 type: Sequelize.UUID,
                 references: {
-                    model: 'areas',
+                    model: 'courses',
                     key: 'id',
                     as: 'disciplines',
                 },

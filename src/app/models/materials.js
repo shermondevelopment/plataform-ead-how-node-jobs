@@ -8,7 +8,11 @@ module.exports = (sequelize, DataTypes) => {
          * The `models/index` file will call this method automatically.
          */
         static associate(models) {
-            this.belongsTo(models.modules);
+            this.belongsTo(models.modules, {
+                throught: 'modules',
+                as: 'material',
+                foreignKey: 'id_module',
+            });
         }
     }
     materials.init(
@@ -18,6 +22,11 @@ module.exports = (sequelize, DataTypes) => {
                 primaryKey: true,
                 type: DataTypes.UUID,
                 defaultValue: DataTypes.UUIDV4,
+            },
+            title: {
+                allowNull: false,
+                type: DataTypes.STRING,
+                validade: { notEmpty: { msg: 'insira um titulo' } },
             },
             url: {
                 type: DataTypes.STRING,

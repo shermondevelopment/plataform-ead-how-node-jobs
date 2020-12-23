@@ -7,6 +7,10 @@ module.exports = {
                 type: Sequelize.UUID,
                 defaultValue: Sequelize.UUIDV4,
             },
+            title: {
+                type: Sequelize.STRING,
+                allowNull: false,
+            },
             url: {
                 type: Sequelize.STRING,
                 allowNull: false,

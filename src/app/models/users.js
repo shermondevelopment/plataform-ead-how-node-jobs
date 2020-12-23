@@ -22,14 +22,16 @@ module.exports = (sequelize, DataTypes) => {
             name: {
                 type: DataTypes.STRING,
                 allowNull: false,
-                validade: { notEmpty: { msg: 'Por Favor! Informe seu nome' } },
+                validate: {
+                    notNull: { msg: 'digite seu nome' },
+                    notEmpty: { msg: 'campo nome não pode ser vazio' },
+                },
             },
             email: {
                 type: DataTypes.STRING,
                 unique: true,
                 validate: {
                     isEmail: { msg: 'Digite um email válido' },
-                    notEmpty: { msg: 'Por favor! digite um email' },
                 },
             },
             password: {
@@ -71,7 +73,7 @@ module.exports = (sequelize, DataTypes) => {
                 },
                 beforeUpdate: async (user) => {
                     const hash = await bcryptjs.hash(user.password, 10);
-                    user.password = hash;
+                    user.password = `${hash}`;
                 },
             },
         }
