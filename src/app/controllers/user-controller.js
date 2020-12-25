@@ -7,6 +7,7 @@ const crypto = require('crypto');
 const multer = require('multer');
 const aws = require('aws-sdk');
 const multerConfig = require('../../config/multer');
+const mailer = require('../../lib/mailer');
 const { users } = require('../models');
 
 const userMiddleware = require('../middlewares/userAuth');
@@ -49,10 +50,26 @@ router.post('/signup', async (req, res) => {
         if (await users.findOne({ where: { email } })) {
             return res.status(400).send({ error: 'Usuário já existe' });
         }
+        /* Defini uma data de Visualização grátis para as video-aula */
         const viewFree = new Date();
         viewFree.setHours(viewFree.getHours() + 120);
 
-        const user = await users.create({ ...req.body, view_free: viewFree });
+        /* Token para Ativar o email futuramente */
+        const token = crypto.randomBytes(16).toString('hex');
+
+        await mailer.sendMail({
+            from: process.env.MAIL_USER,
+            to: email,
+            subject: 'Verificação de E-mail | CérebroNerd',
+            template: 'confirm_email',
+            context: { token },
+        });
+
+        const user = await users.create({
+            ...req.body,
+            token,
+            view_free: viewFree,
+        });
         return res.status(200).json({
             user,
             token: generateToken({ id: user.id }),
@@ -159,5 +176,89 @@ router.post(
         }
     }
 );
+
+router.get('/verify/:token', async (req, res) => {
+    try {
+        const { token } = req.params;
+
+        const tokens = await users.findOne({ where: { token } });
+
+        if (!tokens) {
+            return res.status(400).json({ err: 'Token inválido' });
+        }
+
+        await users.update(
+            { status: true, token: '' },
+            { where: { token: tokens.token } }
+        );
+        return res.status(200).json({ success: 'Email Verificado....' });
+    } catch (err) {
+        return res.status(400).json({ err: 'Ocorreu um erro' });
+    }
+});
+
+router.post('/forgot_password', async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        const searchUser = await users.findOne({ where: { email } });
+
+        if (!searchUser) {
+            res.json({ error: 'Usuario não exite!' });
+        }
+        const token = crypto.randomBytes(20).toString('hex');
+        const now = new Date();
+
+        now.setHours(now.getHours() + 48);
+
+        await users.update(
+            { passwordResetToken: token, passwordResetExpired: now },
+            { where: { id: searchUser.id } }
+        );
+
+        await mailer.sendMail({
+            from: process.env.MAIL_USER,
+            to: email,
+            subject: 'Seu link para recuperação de conta',
+            template: 'forgot_password',
+            context: { token, name: searchUser.name },
+        });
+        return res.status(200).json({
+            success:
+                'Link de recuperação de conta enviado. verifique seu email! ',
+        });
+    } catch (err) {
+        return res.json({ err: 'Erro on forgot password, try again' });
+    }
+});
+
+router.post('/reset_password', async (req, res) => {
+    try {
+        const { token, password } = req.body;
+
+        const user = await users.findOne({
+            where: { passwordResetToken: token },
+        });
+
+        if (token !== user.passwordResetToken) {
+            return res
+                .status(400)
+                .send({ error: 'Token de redefinição de senha inválido' });
+        }
+        const now = new Date();
+        if (now > user.passwordResetExpired) {
+            return res
+                .status(400)
+                .send({ error: 'Token expirado, gere um novo' });
+        }
+        await users.update(
+            { password, passwordResetExpired: null, passwordResetToken: null },
+            { where: { id: user.id }, individualHooks: true }
+        );
+        return res.status(200).json({ success: 'Senha alterada, Faça Login!' });
+    } catch (err) {
+        return res.status(400).json({ error: err });
+    }
+});
 
 module.exports = (app) => app.use('/user', router);
