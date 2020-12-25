@@ -4,6 +4,9 @@ const router = express.Router();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
+const multer = require('multer');
+const aws = require('aws-sdk');
+const multerConfig = require('../../config/multer');
 const { users } = require('../models');
 
 const userMiddleware = require('../middlewares/userAuth');
@@ -102,7 +105,6 @@ router.put('/update', userMiddleware, async (req, res) => {
 });
 
 router.put('/update/password', userMiddleware, async (req, res) => {
-    
     try {
         const { currentPassword, newPassword } = req.body;
         const user = await users.findOne({ where: { id: req.userId } });
@@ -121,8 +123,41 @@ router.put('/update/password', userMiddleware, async (req, res) => {
             .status(200)
             .json({ message: 'Suas informações foram salvas' });
     } catch (err) {
-        return res.status(400).json({ err: 'Não foi possivel concluir ação' });
+        return res
+            .status(400)
+            .json({ err: 'Ocorreu um erro, tente novamente!' });
     }
 });
+
+router.post(
+    '/update/profile',
+    userMiddleware,
+    multer(multerConfig).single('profile'),
+    async (req, res) => {
+        try {
+            const { key: profile } = req.file;
+
+            const seniorProfile = await users.findOne({
+                where: { id: req.userId },
+            });
+
+            const s3 = new aws.S3();
+
+            const params = {
+                Bucket: 'profile-cerebronerd',
+                Key: seniorProfile.profile,
+            };
+            await s3.deleteObject(params).promise();
+
+            await users.update({ profile }, { where: { id: req.userId } });
+
+            return res
+                .status(200)
+                .json({ sucess: 'Perfil atualizado com sucesso!' });
+        } catch (err) {
+            return res.status(400).json({ err: 'Ocorreu um erro' });
+        }
+    }
+);
 
 module.exports = (app) => app.use('/user', router);

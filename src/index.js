@@ -6,7 +6,7 @@ const path = require('path');
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use('/files', express.static(path.resolve(__dirname, 'tmp', 'uploads')));
+app.use('/files', express.static(path.resolve(__dirname, 'tmp', 'profile')));
 app.use(cors());
 
 app.get('/', async (req, res) => {

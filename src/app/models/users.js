@@ -74,6 +74,7 @@ module.exports = (sequelize, DataTypes) => {
                 beforeUpdate: async (user) => {
                     const hash = await bcryptjs.hash(user.password, 10);
                     user.password = `${hash}`;
+                    console.log(user.profile);
                 },
             },
         }
