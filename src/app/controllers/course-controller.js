@@ -94,4 +94,14 @@ router.get('/catch_materials/:id', userMiddleware, async (req, res) => {
     }
 });
 
+router.put('/mark_viewed/:id', userMiddleware, async (req, res) => {
+    try {
+        const { id } = req.params;
+        await classes.update({ view: 1 }, { where: { id } });
+        return res.status(200).json({ success: true });
+    } catch (err) {
+        return res.status(400).json({ err: 'erro no processamento!' });
+    }
+});
+
 module.exports = (app) => app.use('/course', router);
