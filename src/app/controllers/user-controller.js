@@ -71,8 +71,8 @@ router.post('/signup', async (req, res) => {
             view_free: viewFree,
         });
         return res.status(200).json({
-            user,
-            token: generateToken({ id: user.id }),
+            success:
+                'Obrigado Por se cadastrar! Veriique seu e-mail para continuar',
         });
     } catch (err) {
         if (err.errors) {
