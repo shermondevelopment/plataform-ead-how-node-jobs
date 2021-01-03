@@ -65,7 +65,7 @@ router.post('/signup', async (req, res) => {
             context: { token },
         });
 
-        const user = await users.create({
+        await users.create({
             ...req.body,
             token,
             view_free: viewFree,
