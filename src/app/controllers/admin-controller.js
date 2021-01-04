@@ -6,6 +6,7 @@ const slug = require('slugify');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
+const cache = require('../../lib/redis');
 const adminMiddleware = require('../middlewares/adminAuth');
 
 const {
@@ -30,7 +31,14 @@ function generateTokenAdmin(params) {
 */
 router.get('/users', adminMiddleware, async (req, res) => {
     try {
+        const params = 'users:all';
+        const cached = await cache.get(params);
+
+        if (cached) {
+            return res.status(200).json(cached);
+        }
         const user = await users.findAll();
+        cache.set(params, user, 60 * 20);
         return res.status(200).json({ user });
     } catch (err) {
         return res.status(400).json({ err: 'erro na solicitação' });
@@ -58,6 +66,13 @@ router.delete('/delete/users', adminMiddleware, async (req, res) => {
 router.post('/signin', async (req, res) => {
     try {
         const { email, password } = req.body;
+        const params = `user:admin:${email}`;
+
+        const cached = await cache.get(params);
+
+        if (cached) {
+            return res.status(200).json(cached);
+        }
         const user = await users.findOne({ where: { email } });
 
         if (!user) {
@@ -69,9 +84,11 @@ router.post('/signin', async (req, res) => {
         if (!(await bcrypt.compare(password, user.password))) {
             return res.status(400).json({ error: 'Email e/ou senha errado' });
         }
+
         const hash = crypto.randomBytes(20).toString('hex');
 
         await users.update({ private: hash }, { where: { id: user.id } });
+        cache.set(params, user, 60 * 20);
         return res.status(200).json({
             admin: true,
             token: generateTokenAdmin({ id: user.id }),
@@ -102,6 +119,14 @@ router.put('/update', adminMiddleware, async (req, res) => {
 router.get('/course/:page', adminMiddleware, async (req, res) => {
     try {
         const { page } = req.params;
+        const params = `page:course:admin:${page}`;
+
+        const cached = await cache.get(params);
+
+        if (cached) {
+            return res.status(200).json(cached);
+        }
+
         const pageActive = parseInt(page, 10);
         let offset = 0;
         if (pageActive === 1 || pageActive === 0) {
@@ -119,6 +144,7 @@ router.get('/course/:page', adminMiddleware, async (req, res) => {
         } else {
             next = false;
         }
+        cache.set(params, { ...ready, next }, 60 * 20);
         return res.status(200).json({ ...ready, next });
     } catch (err) {
         return res.status(400).json({ err });
@@ -127,12 +153,13 @@ router.get('/course/:page', adminMiddleware, async (req, res) => {
 
 router.post('/create/course', adminMiddleware, async (req, res) => {
     try {
-        const { title, description, image } = req.body;
+        const { title, description, image, time } = req.body;
         await courses.create({
             title,
             description,
             image,
             slug: slug(title, { lower: true }),
+            time,
         });
         return res.status(200).json({ success: 'adicionado com sucesso' });
     } catch (err) {
@@ -170,7 +197,16 @@ router.delete('/delete/course', adminMiddleware, async (req, res) => {
 
 router.get('/disciplines', adminMiddleware, async (req, res) => {
     try {
+        const params = `discipline:admin`;
+
+        const cached = await cache.get(params);
+
+        if (cached) {
+            return res.status(200).json(cached);
+        }
+
         const discipline = await disciplines.findAll();
+        cache.set(params, discipline, 60 * 20);
         return res.status(200).json({ discipline });
     } catch (err) {
         return res.status(400).json({ err });
@@ -222,7 +258,18 @@ router.delete('/disciplines/delete/:id', adminMiddleware, async (req, res) => {
 
 router.get('/modules', adminMiddleware, async (req, res) => {
     try {
+        const params = `modules:admin`;
+
+        const cached = await cache.get(params);
+
+        if (cached) {
+            return res.status(200).json(cached);
+        }
+
         const modulers = await modules.findAll();
+
+        cache.set(params, modulers, 60 * 20);
+
         return res.status(200).json({ modulers });
     } catch (err) {
         return res.status(400).json({ err: 'Ocorreu algum erro' });
@@ -276,7 +323,16 @@ router.delete('/modules/delete/:id', adminMiddleware, async (req, res) => {
 
 router.get('/classes', adminMiddleware, async (req, res) => {
     try {
+        const params = 'classes:admin';
+
+        const cached = await cache.get(params);
+
+        if (cached) {
+            return res.status(200).json(cached);
+        }
+
         const classe = await classes.findAll();
+        cache.set(params, classe, 60 * 20);
         return res.status(200).json({ classe });
     } catch (err) {
         return res.status(400).json({ err: 'Ocorreu um erro!' });
@@ -331,7 +387,16 @@ router.delete('/classes/delete/:id', adminMiddleware, async (req, res) => {
 
 router.get('/materials', adminMiddleware, async (req, res) => {
     try {
+        const params = 'material:admin';
+
+        const cached = await cache.get(params);
+
+        if (cached) {
+            return res.status(200).json(cached);
+        }
+
         const material = await materials.findAll();
+        cache.set(params, material, 60 * 20);
         return res.status(200).json({ material });
     } catch (err) {
         return res.status(400).json({ err: 'ocorreu algum erro!' });
