@@ -15,6 +15,12 @@ module.exports = {
             description: { type: Sequelize.STRING, allowNull: true },
             image: { type: Sequelize.STRING },
             slug: { type: Sequelize.STRING, allowNull: false },
+            qt_disciplines: { type: Sequelize.INTEGER(2), allowNull: false },
+            qt_concluded: {
+                type: Sequelize.INTEGER(2),
+                allowNull: false,
+                defaultValue: 0,
+            },
             time: { type: Sequelize.INTEGER, allowNull: true },
             createdAt: {
                 allowNull: false,

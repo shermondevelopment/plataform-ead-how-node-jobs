@@ -36,7 +36,10 @@ router.post('/signin', async (req, res) => {
         await users.update({ private: hash }, { where: { id: user.id } });
 
         return res.status(200).json({
-            token: generateToken({ id: user.id }),
+            token: generateToken({
+                id: user.id,
+                admin: email === process.env.EMAIL_ADMIN,
+            }),
             user,
         });
     } catch (err) {

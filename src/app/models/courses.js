@@ -31,6 +31,8 @@ module.exports = (sequelize, DataTypes) => {
             description: { type: DataTypes.STRING, allowNull: true },
             image: { type: DataTypes.STRING },
             slug: { type: DataTypes.STRING, allowNull: false },
+            qt_disciplines: { type: DataTypes.NUMBER(2), allowNull: false },
+            qt_concluded: { type: DataTypes.NUMBER(2), defaultValue: 0 },
             time: { type: DataTypes.INTEGER, allowNull: true },
         },
         {

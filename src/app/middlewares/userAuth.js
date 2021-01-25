@@ -21,6 +21,7 @@ module.exports = (req, res, next) => { // eslint-disable-line
             return res.status(401).send({ error: 'Token invalid' });
         }
         req.userId = decoded.params.id;
+        req.admin = decoded.params.admin;
         return next();
     });
 };

@@ -153,4 +153,55 @@ router.put('/mark_viewed/:id', userMiddleware, async (req, res) => {
     }
 });
 
+router.put('/percentage/:id', userMiddleware, async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const course = await courses.findOne({ where: { id } });
+
+        if (course.qt_disciplines === course.qt_concluded) {
+            return res.status(200).json({ return: true });
+        }
+        course.qt_concluded += 1;
+        await course.save();
+        return res.status(200).json({ update: true });
+    } catch (err) {
+        return res.status(400).json({ error: 'error no processamento' });
+    }
+});
+
+router.put('/discipline/percentage/:id', userMiddleware, async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const discipline = await disciplines.findOne({ where: { id } });
+
+        if (discipline.qt_modules === discipline.qt_concluded) {
+            return res.status(200).json({ return: true });
+        }
+        discipline.qt_concluded += 1;
+        await discipline.save();
+        return res.status(200).json({ update: true });
+    } catch (err) {
+        return res.status(400).json({ error: 'error no processamento' });
+    }
+});
+
+router.put('/module/percentage/:id', userMiddleware, async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const moduling = await modules.findOne({ where: { id } });
+
+        if (moduling.qt_class === moduling.qt_concluded) {
+            return res.status(200).json({ return: true });
+        }
+        moduling.qt_concluded += 1;
+        await moduling.save();
+        return res.status(200).json({ update: true });
+    } catch (err) {
+        return res.status(400).json({ error: 'error no processamento' });
+    }
+});
+
 module.exports = (app) => app.use('/course', router);
