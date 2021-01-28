@@ -11,18 +11,20 @@ const {
     modules,
     classes,
     materials,
+    Sequelize: { Op },
 } = require('../models');
 
 /*
 /* Rotas relacionas a usuarios e cursos
 */
 
-router.get('/:page', userMiddleware, async (req, res) => {
+router.get('/', userMiddleware, async (req, res) => {
     try {
-        const { page } = req.params;
+        const { q, page } = req.query;
+
         const pageActive = parseInt(page, 10);
 
-        const params = `course${page}`;
+        const params = `course/${q}/${page}`;
 
         const cached = await cache.get(params);
         if (cached) {
@@ -36,6 +38,11 @@ router.get('/:page', userMiddleware, async (req, res) => {
             offset = parseInt(pageActive, 10) * 8 - 8;
         }
         const ready = await courses.findAndCountAll({
+            where: {
+                title: {
+                    [Op.like]: `${q}%`,
+                },
+            },
             limit: 8,
             offset,
         });
