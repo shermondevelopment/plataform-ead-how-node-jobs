@@ -1,8 +1,9 @@
 const express = require('express');
 
 const router = express.Router();
-
+const multer = require('multer');
 const slug = require('slugify');
+const multerConfig = require('../../config/multer');
 const cache = require('../../lib/redis');
 const userMiddleware = require('../middlewares/userAuth');
 
@@ -89,28 +90,34 @@ router.put('/update/users/:id', userMiddleware, async (req, res) => {
 /* 4º Deletar Curso
 */
 
-router.post('/create/course', userMiddleware, async (req, res) => {
-    try {
-        const { admin } = req;
-        const { title, description, image, time, qtDisciplines } = req.body;
+router.post(
+    '/create/course',
+    userMiddleware,
+    multer(multerConfig).single('profile'),
+    async (req, res) => {
+        try {
+            const { admin } = req;
+            const { key: capaBanner } = req.file;
+            const { title, description, time, qtDisciplines } = req.body;
 
-        if (!admin) {
-            return res.status(400).json({ error: 'you are not an admin' });
+            if (!admin) {
+                return res.status(400).json({ error: 'you are not an admin' });
+            }
+
+            await courses.create({
+                title,
+                description,
+                image: capaBanner,
+                slug: slug(title, { lower: true }),
+                qt_disciplines: qtDisciplines,
+                time,
+            });
+            return res.status(200).json({ success: 'adicionado com sucesso' });
+        } catch (err) {
+            return res.status(400).json({ err });
         }
-
-        await courses.create({
-            title,
-            description,
-            image,
-            slug: slug(title, { lower: true }),
-            qt_disciplines: qtDisciplines,
-            time,
-        });
-        return res.status(200).json({ success: 'adicionado com sucesso' });
-    } catch (err) {
-        return res.status(400).json({ err });
     }
-});
+);
 
 router.put('/update/course', userMiddleware, async (req, res) => {
     try {
