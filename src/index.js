@@ -10,7 +10,7 @@ app.use('/files', express.static(path.resolve(__dirname, 'tmp', 'profile')));
 app.use(cors());
 
 app.get('/', async (req, res) => {
-    res.status(2000).json({ app: 'running' });
+    res.status(200).json({ app: 'running' });
 });
 
 require('./app/controllers')(app);
