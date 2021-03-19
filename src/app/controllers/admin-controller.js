@@ -4,6 +4,7 @@ const router = express.Router();
 const multer = require('multer');
 const slug = require('slugify');
 const multerConfig = require('../../config/multer');
+const multerConfigMaterials = require('../../config/multer-pdf-file');
 const cache = require('../../lib/redis');
 const userMiddleware = require('../middlewares/userAuth');
 
@@ -325,19 +326,29 @@ router.delete('/classes/delete/:id', userMiddleware, async (req, res) => {
 /* Rotas relacionads a materias (pdf, apostilas)
 */
 
-router.post('/materials/create', userMiddleware, async (req, res) => {
-    try {
-        const { admin } = req;
-        const { title, url, idModule } = req.body;
-        if (!admin) {
-            return res.status(400).json({ error: 'you are not an admin' });
+router.post(
+    '/materials/create',
+    userMiddleware,
+    multer(multerConfigMaterials).single('materials'),
+    async (req, res) => {
+        try {
+            const { admin } = req;
+            const { key: materialsPdf } = req.file;
+            const { title, idModule } = req.body;
+            if (!admin) {
+                return res.status(400).json({ error: 'you are not an admin' });
+            }
+            await materials.create({
+                title,
+                url: materialsPdf,
+                id_module: idModule,
+            });
+            return res.status(200).json({ success: 'adiconado com sucesso' });
+        } catch (err) {
+            return res.status(200).json({ err: 'ocorreu um erro' });
         }
-        await materials.create({ title, url, id_module: idModule });
-        return res.status(200).json({ success: 'adiconado com sucesso' });
-    } catch (err) {
-        return res.status(200).json({ err: 'ocorreu um erro' });
     }
-});
+);
 
 router.put('/materials/update/:id', userMiddleware, async (req, res) => {
     try {
