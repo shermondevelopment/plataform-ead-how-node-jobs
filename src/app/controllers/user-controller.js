@@ -207,7 +207,7 @@ router.post('/forgot_password', async (req, res) => {
         const searchUser = await users.findOne({ where: { email } });
 
         if (!searchUser) {
-            res.json({ error: 'Usuario não exite!' });
+            res.json({ error: 'Usuário não encontrado!' });
         }
         const token = crypto.randomBytes(20).toString('hex');
         const now = new Date();
