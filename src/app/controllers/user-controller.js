@@ -194,7 +194,11 @@ router.get('/verify/:token', async (req, res) => {
             { status: true, token: '' },
             { where: { token: tokens.token } }
         );
-        return res.status(200).json({ success: 'Email Verificado....' });
+        return res.status(200).json({
+            token: generateToken({
+                id: tokens.id,
+            }),
+        });
     } catch (err) {
         return res.status(400).json({ err: 'Ocorreu um erro' });
     }
