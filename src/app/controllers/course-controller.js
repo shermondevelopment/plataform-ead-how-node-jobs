@@ -11,6 +11,7 @@ const {
     modules,
     classes,
     materials,
+    historicClass,
     Sequelize: { Op },
 } = require('../models');
 
@@ -150,16 +151,6 @@ router.get('/catch_materials/:id', userMiddleware, async (req, res) => {
     }
 });
 
-router.put('/mark_viewed/:id', userMiddleware, async (req, res) => {
-    try {
-        const { id } = req.params;
-        await classes.update({ view: 1 }, { where: { id } });
-        return res.status(200).json({ success: true });
-    } catch (err) {
-        return res.status(400).json({ err: 'erro no processamento!' });
-    }
-});
-
 router.put('/percentage/:id', userMiddleware, async (req, res) => {
     try {
         const { id } = req.params;
@@ -211,4 +202,30 @@ router.put('/module/percentage/:id', userMiddleware, async (req, res) => {
     }
 });
 
+router.get(
+    '/class_history/:iduser/:idmodule/:idclass',
+    userMiddleware,
+    async (req, res) => {
+        try {
+            const { iduser, idmodule, idclass } = req.params;
+            const historic = await historicClass.findOne({
+                where: {
+                    id_class: idclass,
+                    $and: { id_user: iduser },
+                },
+            });
+            if (historic) {
+                return res.status(200).json({ historic: 'exists' });
+            }
+            await historicClass.create({
+                id_user: iduser,
+                id_module: idmodule,
+                id_class: idclass,
+            });
+            return res.status(200).json({ success: true });
+        } catch (err) {
+            return res.status(400).json({ err });
+        }
+    }
+);
 module.exports = (app) => app.use('/course', router);
