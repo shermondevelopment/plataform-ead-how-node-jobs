@@ -34,7 +34,6 @@ module.exports = (sequelize, DataTypes) => {
                 validae: { notEmpty: { msg: 'Preencha um video' } },
             },
             order: { type: DataTypes.INTEGER(10), notNull: false },
-            view: { type: DataTypes.TINYINT, defaultValue: 0, notNull: false },
         },
         {
             sequelize,

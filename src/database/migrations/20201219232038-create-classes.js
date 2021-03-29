@@ -18,7 +18,6 @@ module.exports = {
                 validae: { notEmpty: { msg: 'Preencha um video' } },
             },
             order: { type: Sequelize.INTEGER(10), notNull: false },
-            view: { type: Sequelize.TINYINT, defaultValue: 0, notNull: false },
             id_module: {
                 type: Sequelize.UUID,
                 references: {
