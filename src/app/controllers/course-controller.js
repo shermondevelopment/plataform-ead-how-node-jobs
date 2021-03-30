@@ -221,6 +221,7 @@ router.get(
                 id_user: iduser,
                 id_module: idmodule,
                 id_class: idclass,
+                view: 1,
             });
             return res.status(200).json({ success: true });
         } catch (err) {

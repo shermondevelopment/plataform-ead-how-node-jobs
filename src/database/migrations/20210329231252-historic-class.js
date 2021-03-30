@@ -34,6 +34,9 @@ module.exports = {
                     as: 'class',
                 },
             },
+            view: {
+                type: Sequelize.BOOLEAN,
+            },
         });
     },
 
