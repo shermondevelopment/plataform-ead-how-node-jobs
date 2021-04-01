@@ -34,11 +34,6 @@ module.exports = (sequelize, DataTypes) => {
             },
             slug: { type: DataTypes.STRING, allowNull: false },
             qt_class: { type: DataTypes.INTEGER, allowNull: false },
-            qt_concluded: {
-                type: DataTypes.INTEGER,
-                allowNull: false,
-                defaultValue: 0,
-            },
             order: { type: DataTypes.INTEGER(10), allowNull: false },
         },
         {

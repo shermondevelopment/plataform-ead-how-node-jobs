@@ -35,11 +35,6 @@ module.exports = (sequelize, DataTypes) => {
             slug: { type: DataTypes.STRING, allowNull: false },
             image: { type: DataTypes.STRING },
             qt_modules: { type: DataTypes.INTEGER(2), allowNull: false },
-            qt_concluded: {
-                type: DataTypes.INTEGER(2),
-                allowNull: false,
-                defaultValue: 0,
-            },
         },
         {
             sequelize,
